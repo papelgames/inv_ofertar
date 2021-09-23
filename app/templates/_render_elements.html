@@ -1,0 +1,35 @@
+{% macro render_input(field_name) %}
+
+	{% if field_name.errors %}
+		{% for error in field_name.errors %}
+			<div class="alert-warning alert alert-dismissible fade show" role="alert">
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+				{{ error }}
+			</div>
+		{% endfor %}
+	{% endif %}
+
+	<td> {{field_name.label}}
+		<div class="form-group">	
+    		{{field_name(**kwargs)|safe}} 
+		</div>
+
+{% endmacro %}
+
+{% macro render_messages(messages) %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			{% for category, message in messages %}
+				<div class="{{ category }} alert alert-dismissible fade show" role="alert">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+					{{ message }}
+				</div>
+			{% endfor %}
+		{% endif %}
+
+	{% endwith %}
+{% endmacro %}
