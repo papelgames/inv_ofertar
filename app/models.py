@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
+#from app.compulsa.routes import tipo_bien_select
 
 class Base(db.Model):
     __abstract__ = True
@@ -131,27 +132,65 @@ class Compulsas (Base):
     bien = db.Column(db.String(256), nullable = False)
     fecha_inicio = db.Column(db.DateTime, nullable = False)
     fecha_vencimiento = db.Column(db.DateTime, nullable = False)
+    siniestro = db.Column(db.Integer, nullable = False)
+    patente = db.Column(db.String(7), nullable = False)
     usuario_creador = db.Column(db.Integer)
     usuario_aprobador = db.Column(db.Integer)
     ubicacion = db.Column(db.String(150), nullable = False)
     condiciones_generales = db.Column(db.Text, nullable = False)
     importe_base = db.Column(db.Integer, nullable = False)
     para_empleados = db.Column(db.Boolean, default=False)
-    tipo_bien = db.Column(db.Integer, nullable=False)
-    imagenes = db.Column(db.Integer, db.ForeignKey('imagenes.id'), nullable=False)
+    tipo_bien_id = db.Column(db.Integer, db.ForeignKey('tipobienes.id'), nullable=False)
+    status = db.Column(db.String(20))
     ofrecimiento = db.relationship('Ofrecimientos', backref='compulsa', lazy=True, cascade='all, delete-orphan',
                                order_by='asc(Ofrecimientos.created)')
-   
+    imagenes = db.relationship('Imagenes', backref='imagen_br', lazy=True,cascade='all, delete-orphan',
+                               order_by='asc(Imagenes.created)')
+    
+
+    @staticmethod
+    def get_all():
+        return db.session.query(Compulsas, TipoBienes).filter(Compulsas.tipo_bien_id == TipoBienes.id).all()
+        #return db.session.query(Compulsas, TipoBienes).all()
+    
+    @staticmethod
+    def get_activas():
+        return db.session.query(Compulsas, TipoBienes). \
+            filter(Compulsas.tipo_bien_id == TipoBienes.id). \
+            filter(Compulsas.fecha_inicio <= datetime.datetime.now() ,Compulsas.fecha_vencimiento >= datetime.datetime.now() ).all()
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
 class Imagenes(Base):
     __tablename__ = "imagenes"
     imagen = db.Column(db.String(256), nullable = False)
-    compulsa = db.relationship('Compulsas', backref='compulsa', lazy=True,cascade='all, delete-orphan',
-                               order_by='asc(Compulsas.created)')
+    compulsa_id = db.Column(db.Integer, db.ForeignKey('compulsas.id'), nullable=False)
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
 
 class TipoBienes(Base):
     __tablename__ = "tipobienes"
     tipo_bien = db.Column(db.String(50), nullable = False)
+    compulsa = db.relationship('Compulsas', backref='compulsa_br', lazy=True)
 
+    @staticmethod
+    def get_all():
+        return TipoBienes.query.all()
+        #return db.session.query(TipoBienes,Compulsas).filter(TipoBienes.id == Compulsas.tipo_bien_id).all()
+'''
+Session.query(User,Document,DocumentPermissions)
+    .filter(User.email == Document.author)
+    .filter(Document.name == DocumentPermissions.document)
+    .filter(User.email == 'someemail')
+    .all()
+'''
 class CorreosElectronicos (Base):
     __tablename__ = "correoselectronicos"
     correo = db.Column(db.String(256), unique=True, nullable=False)

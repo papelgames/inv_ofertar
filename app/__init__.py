@@ -51,6 +51,9 @@ def create_app(settings_module):
     from .compulsa import compulsa_bp
     app.register_blueprint(compulsa_bp)
 
+    from .ofrecimiento import ofrecimiento_bp
+    app.register_blueprint(ofrecimiento_bp)
+
     # Custom error handlers
     register_error_handlers(app)
 

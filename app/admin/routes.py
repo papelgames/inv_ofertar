@@ -1,4 +1,3 @@
-
 import logging
 import os
 
@@ -37,6 +36,7 @@ def post_form():
     """Crea un nuevo post"""
     form = PostForm()
     if form.validate_on_submit():
+        print('entro aca')
         title = form.title.data
         content = form.content.data
         file = form.post_image.data

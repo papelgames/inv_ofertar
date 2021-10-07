@@ -36,7 +36,7 @@ def show_signup_form():
                        text_body=f'Hola {name}, bienvenid@ al miniblog de Flask',
                        html_body=f'<p>Hola <strong>{name}</strong>, bienvenid@ al miniblog de Flask</p>')
             # Dejamos al usuario logueado
-            login_user(user, remember=True)
+            login_user(user, remember=False)
             next_page = request.args.get('next', None)
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('public.index')
