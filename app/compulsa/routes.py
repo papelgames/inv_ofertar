@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required
-from app.auth.models import User
+#from app.auth.models import Users
 from app.models import Compulsas, Imagenes, TipoBienes
 from . import compulsa_bp
 from .forms import AltaCompulsaForm, ImagenesBienesForm
@@ -88,7 +88,7 @@ def imagenes_de_bienes(id_compulsa):
             file_path = os.path.join(images_dir, image_name)
             imagen.save(file_path)
         
-            imagenes = Imagenes(imagen = file_path,
+            imagenes = Imagenes(imagen = image_name,
                                 compulsa_id = id_compulsa)
             imagenes.save()
 

@@ -12,8 +12,8 @@
 
 		<form action="" method="post" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
-			{{ render_input(form.imagenes_bienes, id= "imagenes_bien" , class="form-control", placeholder="Imagenes de los bienes" ) }}
-			{{ render_input(form.submit, class="btn btn-primary" ) }}
+			{{ render_input(form.imagenes_bienes,'', id= "imagenes_bien" , class="form-control", placeholder="Imagenes de los bienes" ) }}
+			{{ render_input(form.submit,'', class="btn btn-primary" ) }}
 			
 		</form>
 	</div>

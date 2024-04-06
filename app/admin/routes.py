@@ -1,120 +1,60 @@
 import logging
 import os
 
-from flask import render_template, redirect, url_for, abort, current_app
+from flask import render_template, redirect, url_for, abort, current_app, flash, request
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
-from app.auth.decorators import admin_required
-from app.auth.models import User
-from app.models import Post
+from app.auth.decorators import admin_required, not_initial_status
+from app.auth.models import Users
+from app.models import  Permisos, Roles
 from . import admin_bp
-from .forms import PostForm, UserAdminForm
+from .forms import UserAdminForm, PermisosUserForm, RolesUserForm
 
 logger = logging.getLogger(__name__)
+
+#creo una tupla para usar en el campo select del form que quiera que necesite los permisos
+def permisos_select():
+    permisos = Permisos.get_all()
+    select_permisos =[( '','Seleccionar permiso')]
+    for rs in permisos:
+        sub_select_permisos = (str(rs.id), rs.descripcion)
+        select_permisos.append(sub_select_permisos)
+    return select_permisos
+
+#creo una tupla para usar en el campo select del form que quiera que necesite los roles
+def roles_select():
+    roles = Roles.get_all()
+    select_rol =[( '','Seleccionar permiso')]
+    for rs in roles:
+        sub_select_rol = (str(rs.id), rs.descripcion)
+        select_rol.append(sub_select_rol)
+    return select_rol
 
 
 @admin_bp.route("/admin/")
 @login_required
 @admin_required
+@not_initial_status
 def index():
     return render_template("admin/index.html")
-
-
-@admin_bp.route("/admin/posts/")
-@login_required
-@admin_required
-def list_posts():
-    posts = Post.get_all()
-    return render_template("admin/posts.html", posts=posts)
-
-
-@admin_bp.route("/admin/post/", methods=['GET', 'POST'])
-@login_required
-@admin_required
-def post_form():
-    """Crea un nuevo post"""
-    form = PostForm()
-    if form.validate_on_submit():
-        print('entro aca')
-        title = form.title.data
-        content = form.content.data
-        file = form.post_image.data
-        image_name = None
-        # Comprueba si se ha subido un fichero
-        if file:
-            image_name = secure_filename(file.filename)
-            images_dir = current_app.config['POSTS_IMAGES_DIR']
-            os.makedirs(images_dir, exist_ok=True)
-            file_path = os.path.join(images_dir, image_name)
-            file.save(file_path)
-        post = Post(user_id=current_user.id, title=title, content=content)
-        post.image_name = image_name
-        post.save()
-        logger.info(f'Guardando nuevo post {title}')
-        return redirect(url_for('admin.list_posts'))
-    return render_template("admin/post_form.html", form=form)
-
-
-@admin_bp.route("/admin/post/<int:post_id>/", methods=['GET', 'POST'])
-@login_required
-@admin_required
-def update_post_form(post_id):
-    """Actualiza un post existente"""
-    post = Post.get_by_id(post_id)
-    if post is None:
-        logger.info(f'El post {post_id} no existe')
-        abort(404)
-    # Crea un formulario inicializando los campos con
-    # los valores del post.
-    form = PostForm(obj=post)
-    if form.validate_on_submit():
-        # Actualiza los campos del post existente
-        post.title = form.title.data
-        post.content = form.content.data
-        file = form.post_image.data
-        # Comprueba si se ha subido un fichero
-        if file:
-            image_name = secure_filename(file.filename)
-            images_dir = current_app.config['POSTS_IMAGES_DIR']
-            os.makedirs(images_dir, exist_ok=True)
-            file_path = os.path.join(images_dir, image_name)
-            file.save(file_path)
-            post.image_name = image_name
-        post.save()
-        logger.info(f'Guardando el post {post_id}')
-        return redirect(url_for('admin.list_posts'))
-    return render_template("admin/post_form.html", form=form, post=post)
-
-
-@admin_bp.route("/admin/post/delete/<int:post_id>/", methods=['POST', ])
-@login_required
-@admin_required
-def delete_post(post_id):
-    logger.info(f'Se va a eliminar el post {post_id}')
-    post = Post.get_by_id(post_id)
-    if post is None:
-        logger.info(f'El post {post_id} no existe')
-        abort(404)
-    post.delete()
-    logger.info(f'El post {post_id} ha sido eliminado')
-    return redirect(url_for('admin.list_posts'))
-
 
 @admin_bp.route("/admin/users/")
 @login_required
 @admin_required
+@not_initial_status
 def list_users():
-    users = User.get_all()
+    users = Users.get_all()
     return render_template("admin/users.html", users=users)
 
 
 @admin_bp.route("/admin/user/<int:user_id>/", methods=['GET', 'POST'])
 @login_required
 @admin_required
+@not_initial_status
 def update_user_form(user_id):
     # Aquí entra para actualizar un usuario existente
-    user = User.get_by_id(user_id)
+    user = Users.get_by_id(user_id)
     if user is None:
         logger.info(f'El usuario {user_id} no existe')
         abort(404)
@@ -123,7 +63,9 @@ def update_user_form(user_id):
     form = UserAdminForm(obj=user)
     if form.validate_on_submit():
         # Actualiza los campos del usuario existente
-        user.is_admin = form.is_admin.data
+        # user.is_admin = form.is_admin.data
+        # user.es_dibujante = form.es_dibujante.data
+        form.populate_obj(user)
         user.save()
         logger.info(f'Guardando el usuario {user_id}')
         return redirect(url_for('admin.list_users'))
@@ -133,12 +75,81 @@ def update_user_form(user_id):
 @admin_bp.route("/admin/user/delete/<int:user_id>/", methods=['POST', ])
 @login_required
 @admin_required
+@not_initial_status
 def delete_user(user_id):
     logger.info(f'Se va a eliminar al usuario {user_id}')
-    user = User.get_by_id(user_id)
+    user = Users.get_by_id(user_id)
     if user is None:
         logger.info(f'El usuario {user_id} no existe')
         abort(404)
     user.delete()
     logger.info(f'El usuario {user_id} ha sido eliminado')
     return redirect(url_for('admin.list_users'))
+
+@admin_bp.route("/admin/asignacionpermisos/<int:user_id>/", methods=['GET', 'POST'])
+@login_required
+@admin_required
+@not_initial_status
+def asignacion_permisos(user_id):
+    # Aquí entra para actualizar un usuario existente
+    user = Users.get_by_id(user_id)
+    form = PermisosUserForm()
+    form.id_permiso.choices = permisos_select()
+    
+    if form.validate_on_submit():
+        permiso = Permisos.get_by_id(form.id_permiso.data)
+        for permiso_en_user in user.permisos:
+            if permiso_en_user.id == int(form.id_permiso.data):
+                flash ('El usuario ya tiene el permiso', 'alert-warning')
+                return redirect(url_for('admin.asignacion_permisos', user_id = user_id))
+        user.permisos.append(permiso)
+
+        user.save()
+        
+        flash ('Permiso asignado correctamente', 'alert-success')
+        return redirect(url_for('admin.asignacion_permisos', user_id = user_id))
+    return render_template("admin/permisos_usuarios.html", form=form, user=user)
+
+
+@admin_bp.route("/admin/asignacionroles/<int:user_id>/", methods=['GET', 'POST'])
+@login_required
+@admin_required
+@not_initial_status
+def asignacion_roles(user_id):
+    # Aquí entra para actualizar un usuario existente
+    user = Users.get_by_id(user_id)
+    form = RolesUserForm()
+    form.rol.choices = roles_select()
+    
+    if form.validate_on_submit():
+        permisos_de_roles = Roles.get_by_id(form.rol.data)
+        for permiso in permisos_de_roles.permisos:
+            control = True
+            for permiso_en_user in user.permisos:
+                if permiso_en_user.id == permiso.id:
+                    control = False
+                
+            if control:
+                user.permisos.append(permiso)
+              
+        user.save()
+
+        flash ('Permiso asignado correctamente', 'alert-success')
+        return redirect(url_for('admin.asignacion_roles', user_id = user_id))
+    return render_template("admin/roles_usuarios.html", form=form, user=user)
+
+
+@admin_bp.route("/admin/eliminarpermisousuario/", methods=['GET', 'POST'])
+@login_required
+@admin_required
+@not_initial_status
+def eliminar_permiso_usuario():
+    user_id = request.args.get('user_id','')
+    id_permiso = request.args.get('id_permiso','')
+    user = Users.get_by_id(user_id)
+    permiso = Permisos.get_by_id(id_permiso)
+    
+    user.permisos.remove(permiso)
+    user.save()
+    flash ('Permiso eliminado correctamente', 'alert-success')
+    return redirect(url_for('admin.asignacion_permisos', user_id = user_id))

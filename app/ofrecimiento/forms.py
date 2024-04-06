@@ -1,19 +1,22 @@
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import (StringField, SubmitField, TextAreaField, BooleanField)
-from wtforms.validators import DataRequired, Length
+from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, PasswordField, IntegerField)
+from wtforms.fields import FloatField, IntegerField
+from wtforms.validators import DataRequired, Length, Email
 
 
-class PostForm(FlaskForm):
-    title = StringField('Título', validators=[DataRequired(), Length(max=128)])
-    content = TextAreaField('Contenido')
-    post_image = FileField('Imagen de cabecera', validators=[
-        FileAllowed(['jpg', 'png'], 'Solo se permiten imágenes')
-    ])
-    submit = SubmitField('Guardar')
+class InicioOfertaForm(FlaskForm):
+    nombre_apellido_rs = StringField('Nombre y apellido o Razón social', validators=[DataRequired()])
+    dni = IntegerField('DNI o CUIT', validators=[DataRequired()])
+    correo_electronico = StringField('Email', validators=[DataRequired(), Email()])
+    pin_temporal = PasswordField('Pin temporal', validators=[DataRequired()])
+    submit = SubmitField('Enviar')
 
 
-class UserAdminForm(FlaskForm):
-    is_admin = BooleanField('Administrador')
-    submit = SubmitField('Guardar')
+class OfertaForm(FlaskForm):
+    dni = IntegerField('DNI o CUIT', validators=[DataRequired()])
+    correo_electronico = StringField('Email', validators=[DataRequired(), Email()])
+    importe_a_ofertar = FloatField('Importe a ofertar', validators=[DataRequired()])
+    pin_temporal = PasswordField('Pin temporal', validators=[DataRequired()])
+    submit = SubmitField('Enviar')

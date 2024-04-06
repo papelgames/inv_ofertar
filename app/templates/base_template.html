@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}
+        {% endblock %}</title>
     {% block styles %}
-        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
-        <link rel="stylesheet" href={{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}>
-        <link rel="stylesheet" href={{ url_for('static', filename='css/style.css') }}>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.png') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% endblock %}
 </head>
 <body>
@@ -27,20 +28,53 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.login') }}">Ingresar <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.show_signup_form') }}">Registrate <span class="sr-only">(current)</span></a>
-                </li>
+
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link">{{ current_user.name }} <span class="sr-only">(current)</span></a>
+                    <a class="nav-link">{{ current_user.persona.descripcion_nombre }} <span class="sr-only">(current)</span></a>
                 </li>
                 {% if current_user.is_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin.index') }}">Admin <span class="sr-only">(current)</span></a>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            GESTION DE USUARIOS
+                          </a>
+                          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="nav-link" href="{{ url_for('admin.list_users') }}">Admin <span class="sr-only">(current)</span></a>
+                            <a class="nav-link" href="{{ url_for('auth.show_signup_form') }}">Registro de usuarios <span class="sr-only">(current)</span></a>          
+                          </div>
+                    </li>
+                
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            ABM
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="nav-link" href="#">Tipos de gestion<span class="sr-only">(current)</span></a>
+                            <a class="nav-link" href="#">Tipos de bien<span class="sr-only">(current)</span></a>
+                            <a class="nav-link" href="#">Permisos<span class="sr-only">(current)</span></a>
+                            <a class="nav-link" href="#">Roles<span class="sr-only">(current)</span></a>
+                            <a class="nav-link" href="#">Tareas<span class="sr-only">(current)</span></a>
+                        </div>
                     </li>
                 {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        CONSULTAS
+                    </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Consulta de personas</a>
+                            <a class="dropdown-item" href="#">Consulta de gestiones</a>
+                            <a class="dropdown-item" href="#">Tareas pendientes</a>
+                        </div>
+
+                </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Salir <span class="sr-only">(current)</span></a>            
+                    <a class="nav-link" href="#">GESTIONES <span class="sr-only">(current)</span></a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout')}}">Salir <span class="sr-only">(current)</span></a>            
                 </li>
             {% endif %}
             </li>
@@ -54,6 +88,8 @@
 <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mejoras.js') }}"></script>
+<script src="{{ url_for('static', filename='js/qrcode.min.js') }}"></script>
 {% endblock %}
 
 </body>

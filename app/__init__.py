@@ -54,6 +54,12 @@ def create_app(settings_module):
     from .ofrecimiento import ofrecimiento_bp
     app.register_blueprint(ofrecimiento_bp)
 
+    from .vehiculos import vehiculos_bp
+    app.register_blueprint(vehiculos_bp)
+
+    from .abms import abms_bp
+    app.register_blueprint(abms_bp)
+
     # Custom error handlers
     register_error_handlers(app)
 

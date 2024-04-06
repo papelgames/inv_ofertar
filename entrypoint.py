@@ -5,6 +5,13 @@ from flask import send_from_directory
 
 from app import create_app
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+project_folder = os.path.expanduser('~/groma')  # adjust as appropriate
+load_dotenv(os.path.join(project_folder, '.env'))
+
 
 settings_module = os.getenv('APP_SETTINGS_MODULE')
 app = create_app(settings_module)

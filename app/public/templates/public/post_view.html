@@ -9,7 +9,8 @@
     </div>
     {% if post.image_name %}
         <div>
-            <img src="{{ url_for('media_posts', filename=post.image_name) }}" />
+            {{ post.image_name}}
+            <img src="{{ url_for('media_posts', filename=post.image_name) }}"/>
         </div>
     {% endif %}
     {{ post.content }}

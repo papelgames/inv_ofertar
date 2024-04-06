@@ -2,28 +2,16 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, DateField,  SelectField)
-from wtforms.fields.core import FloatField, IntegerField
-from wtforms.validators import DataRequired, Length, Required
+from wtforms.fields import FloatField, IntegerField
+from wtforms.validators import DataRequired, Length
 
-class PostForm(FlaskForm):
-    title = StringField('Título', validators=[DataRequired(), Length(max=128)])
-    content = TextAreaField('Contenido')
-    post_image = FileField('Imagen de cabecera', validators=[
-        FileAllowed(['jpg', 'png'], 'Solo se permiten imágenes')
-    ])
-    submit = SubmitField('Guardar')
-
-
-class UserAdminForm(FlaskForm):
-    is_admin = BooleanField('Administrador')
-    submit = SubmitField('Guardar')
 
 class AltaCompulsaForm(FlaskForm):
     bien = StringField('Descripción del bien', validators=[DataRequired(), Length(max=128)])
     siniestro = IntegerField('Número de siniestro', validators=[DataRequired('Debe completar el número de siniestro')])
     patente = StringField('Patente', validators=[DataRequired('Debe completar la patente')])
-    fecha_inicio = DateField('Inicio de compulsa',format='%d/%m/%Y',validators=[Required('Debe completar la fecha de inicio')])
-    fecha_vencimiento = DateField('Fin de compulsa',format='%d/%m/%Y', validators=[Required('Debe completar la fecha de vencimiento')])
+    fecha_inicio = DateField('Inicio de compulsa',format='%d/%m/%Y',validators=[DataRequired('Debe completar la fecha de inicio')])
+    fecha_vencimiento = DateField('Fin de compulsa',format='%d/%m/%Y', validators=[DataRequired('Debe completar la fecha de vencimiento')])
     ubicacion = StringField('Ubicación del bien', validators=[DataRequired(), Length(max=128)])
     condiciones_generales = TextAreaField('Condiciones generales', validators=[DataRequired()])
     importe_base = FloatField('Importe base de la compulsa', validators=[DataRequired()])
